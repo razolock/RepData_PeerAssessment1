@@ -26,7 +26,7 @@ x$newDate <- as.POSIXct(strptime(x$date, '%Y-%m-%d'))
 ## What is mean total number of steps taken per day?
 First, make a histogram of the total number of steps taken each day.  For this part of the assignment, missing values can be ignored.
 
-```{r}
+```{r histogram1}
 hist(x$steps, main = "Histogram of number of steps taken each day", xlab = "number of steps")
 ```
 
@@ -78,7 +78,7 @@ medianSteps2 <- median(x$steps2, na.rm = TRUE)
 
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r}
+```{r histogram2}
 hist(x$steps2, main = "Histogram of number of steps taken each day", xlab = "number of steps")
 ```
 
@@ -116,6 +116,6 @@ Finally, I'll use the `lattice` plotting system to make a panel plot containing 
 library(lattice)
 ```
 
-```{r}
+```{r panel}
 xyplot(v ~ interval | type, data = x3, type = "l", layout =c(1, 2), xlab = "interval", ylab = "Number of steps")
 ```
