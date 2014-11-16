@@ -26,7 +26,7 @@ First, make a histogram of the total number of steps taken each day.  For this p
 hist(x$steps, main = "Histogram of number of steps taken each day", xlab = "number of steps")
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+![](./PA1_ruthZk_files/figure-html/unnamed-chunk-3-1.png) 
 
 In this next part of the assignment, the mean and median total number of steps is calculated and reported.  
 
@@ -52,7 +52,7 @@ plot(x2$interval, x2$v, type = "l", main = "Average Daily Activity Pattern",
      ylab = "average number of steps taken")
 ```
 
-![](./PA1_template_files/figure-html/activityPattern-1.png) 
+![](./PA1_ruthZk_files/figure-html/activityPattern-1.png) 
 
 ```r
 maxInterval <- x2$interval[which.max(x2$v)]
@@ -88,7 +88,7 @@ Make a histogram of the total number of steps taken each day and Calculate and r
 hist(x$steps2, main = "Histogram of number of steps taken each day", xlab = "number of steps")
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+![](./PA1_ruthZk_files/figure-html/unnamed-chunk-5-1.png) 
 
 Now we can compare the impact of removing the missing values.  
 
@@ -129,4 +129,4 @@ Finally, I'll use the `lattice` plotting system to make a panel plot containing 
 xyplot(v ~ interval | type, data = x3, type = "l", layout =c(1, 2), xlab = "interval", ylab = "Number of steps")
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+![](./PA1_ruthZk_files/figure-html/unnamed-chunk-9-1.png) 
