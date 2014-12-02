@@ -16,6 +16,9 @@ Next, the date will be converted to POSIXct format using the `strptime` command 
 
 ```r
 x$newDate <- as.POSIXct(strptime(x$date, '%Y-%m-%d'))
+x$timeInterval_hour <- x$interval %/% 100
+x$timeInterval_min <- x$interval %% 100
+x$time <- sprintf("%0.2d:%0.2d", x$timeInterval_hour, x$timeInterval_min)
 ```
 
 ## What is mean total number of steps taken per day?
@@ -23,7 +26,8 @@ First, make a histogram of the total number of steps taken each day.  For this p
 
 
 ```r
-hist(x$steps, main = "Histogram of number of steps taken each day", xlab = "number of steps")
+x_byDay <- aggregate(steps ~ date, data = x, FUN = sum)
+hist(x_byDay$steps, main = "Histogram of number of steps taken each day", xlab = "number of steps", col = "lightgreen")
 ```
 
 ![](./PA1_template_files/figure-html/histogram1-1.png) 
@@ -32,11 +36,11 @@ In this next part of the assignment, the mean and median total number of steps i
 
 
 ```r
-meanSteps <- mean(x$steps, na.rm = TRUE)
-medianSteps <- median(x$steps, na.rm = TRUE)
+meanSteps <- as.integer(round(mean(x_byDay$steps, na.rm = TRUE)))
+medianSteps <- as.integer(round(median(x_byDay$steps, na.rm = TRUE)))
 ```
 
-The mean number of steps taken per day is 37.3825996 and the median number of steps taken is 0.
+The mean number of steps taken per day is 10766 and the median number of steps taken is 10765.
     
 ## What is the average daily activity pattern?
 
@@ -46,21 +50,25 @@ A time series plot of the 5-minute interval (x-axis) and the average number of s
 
 
 ```r
-x2 <- summarize(group_by(x, interval), v = mean(steps, na.rm = TRUE))
-plot(x2$interval, x2$v, type = "l", main = "Average Daily Activity Pattern", 
-     xlab = "5-minute interval", 
-     ylab = "average number of steps taken")
+average_byInterval <- aggregate(steps ~ time, data = x, mean)
+average_byInterval$timeInterval <- as.POSIXct(average_byInterval$time,
+                                              format = "%H:%M")
+plot(average_byInterval$timeInterval, average_byInterval$steps,
+     type = "l",
+     xlab = "Interval time",
+     ylab = "Average number of steps")
 ```
 
 ![](./PA1_template_files/figure-html/activityPattern-1.png) 
 
 ```r
-maxInterval <- x2$interval[which.max(x2$v)]
+maxIntervalTime <- average_byInterval$timeInterval[which.max(average_byInterval$steps)]
+maxInterval <- format(maxIntervalTime, format = "%H:%M")
 ```
 
-Interval number 835 has the highest average number of steps.
+The 08:35 interval has the highest average number of steps.
 
-## Imputing missing values (sic)
+## Imputing missing values
 
 In this part of the assignment, the total number of missing values in the dataset is calculated and reported.  The total number of missing values is easily calculated using the `is.na` command.
 
@@ -71,30 +79,35 @@ sumNA <- sum(is.na(x))
 
 There are 2304 missing values in the data set.
 
-My strategy for filling in all of the missing values in the dataset is to assign all missing values to zero.  Since all missing values are in the `steps` column, I'll create a new column called `steps2` with all of the missing data filled in.
+My strategy for filling in all of the missing values in the dataset is to assign all missing values the mean of all other days.  
 
 
 ```r
-x$steps2 <- x$steps
-x$steps2[is.na(x$steps)] <- 0
-meanSteps2 <- mean(x$steps2, na.rm = TRUE)
-medianSteps2 <- median(x$steps2, na.rm = TRUE)
+y <- merge(x, average_byInterval, by = "time")
+y$steps.x[is.na(y$steps.x)] <- y$steps.y[is.na(y$steps.x)]
+y <- data.frame(y$steps.x, y$date, y$interval, y$timeInterval, y$time)
+colnames(y) <- c("steps", "date", "interval", "timeInterval", "time")
+
+y_byDay <- aggregate(steps ~ date, data = y, FUN = sum)
+
+meanSteps2 <- as.integer(round(mean(y_byDay$steps, na.rm = TRUE)))
+medianSteps2 <- as.integer(round(median(y_byDay$steps, na.rm = TRUE)))
 ```
 
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
 ```r
-hist(x$steps2, main = "Histogram of number of steps taken each day", xlab = "number of steps")
+par (mfrow = c(1,2))
+hist(x_byDay$steps, main = "Original", xlab = "number of steps", col = "lightgreen", ylim = c(0, 35))
+hist(y_byDay$steps, main = "Missing values imputed", xlab = "number of steps", col = "skyblue", ylim = c(0, 35))
 ```
 
 ![](./PA1_template_files/figure-html/histogram2-1.png) 
 
 Now we can compare the impact of removing the missing values.  
 
-In the data set with missing values, the mean was 37.3825996 and the median number of steps taken was 0.  The lower mean value isn't surprising given my replacement strategy.
-
-With the missing values removed, the mean is now 32.4799636 and the median is now 0.
+In the data set with missing values, the mean was 10766 and is still 10766. The median number of steps taken was 10765 and is now 10766.  Not much has changed.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
